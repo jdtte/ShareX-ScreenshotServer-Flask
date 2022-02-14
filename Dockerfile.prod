@@ -1,0 +1,58 @@
+###########
+# BUILDER #
+###########
+
+# pull official base image
+FROM python:3.9.6-alpine as builder
+
+
+# set work directory
+WORKDIR /flaskUploader
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install system dependencies
+RUN apk update && \
+    apk add gcc
+
+# install python dependencies
+COPY ./requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /flaskUploader/wheels -r requirements.txt
+
+
+#########
+# FINAL #
+#########
+
+# pull official base image
+FROM python:3.9.6-alpine
+
+# create directory for the app user
+RUN mkdir -p /home/flasker
+
+# create the app user
+RUN addgroup -S flasker && adduser -S flasker -G flasker
+
+# create the appropriate directories
+ENV HOME=/home/flasker
+ENV APP_HOME=/home/flasker/web
+RUN mkdir $APP_HOME
+WORKDIR $APP_HOME
+
+# install dependencies
+RUN apk update
+COPY --from=builder /flaskUploader/wheels /wheels
+COPY --from=builder /flaskUploader/requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install --no-cache /wheels/*
+
+# copy project
+COPY . $APP_HOME
+
+# chown all the files to the app user
+RUN chown -R flasker:flasker $APP_HOME
+
+# change to the app user
+USER flasker
