@@ -9,7 +9,7 @@ UPLOAD_FOLDER = 'static/uploads/'
 app = Flask(__name__)
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 1500 * 1024 * 1024  # 1.5 GB max size
 app.config['STATIC_FOLDER'] = f"{os.getenv('APP_FOLDER')}/static/uploads"
 
 
@@ -35,7 +35,9 @@ def sharex_upload():
         random_file_name = _create_random_file_name()
 
     upload = request.files['image']
-    file_name = secure_filename(random_file_name)
+
+    file_ending = os.path.splitext(upload.filename)[-1]
+    file_name = secure_filename(random_file_name + file_ending)
     upload.save(os.path.join(static_path, file_name))
     print(upload)
     return request.host_url + str(file_name)
