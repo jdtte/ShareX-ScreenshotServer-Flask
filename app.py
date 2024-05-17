@@ -9,7 +9,7 @@ UPLOAD_FOLDER = 'static/uploads/'
 app = Flask(__name__)
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 1500 * 1024 * 1024  # 1.5 GB max size
+app.config['MAX_CONTENT_LENGTH'] = 5000 * 1024 * 1024  # 5 GB max size Note this will require a server with more then 5 gb of memory
 app.config['STATIC_FOLDER'] = f"{os.getenv('APP_FOLDER')}/{UPLOAD_FOLDER}"
 
 
